@@ -1,0 +1,77 @@
+Create DATABASE Studiar;
+#User table
+CREATE TABLE user_table(
+userId int AUTO_INCREMENT Primary Key, 
+Fname varchar(255) NOT NULL,
+Lname varchar(255) NOT NULL,
+Institute varchar(255) NOT NULL,
+College varchar(255) NOT NULL,
+Department varchar(255) NOT NULL,
+Gender varchar (7) NOT NULL,
+Email varchar(255) UNIQUE NOT NULL,
+Password varchar(255) NOT NULL
+);
+#group table
+CREATE TABLE group_table(
+groupId int (255) AUTO_INCREMENT Primary Key, 
+group_name varchar(250) NOT NULL,
+group_admin int(11)  NOT NULL, 
+state varchar(8) DEFAULT ‘inactive’, 
+About varchar (355) NOT NULL,
+CONSTRAINT group_admin FOREIGN KEY (group_admin) REFERENCES user_table(userId)
+);
+#membership table
+CREATE TABLE member_of(
+userID int NOT NULL,
+groupID int NOT NULL,
+CONSTRAINT memberid PRIMARY KEY(userID,groupID),
+ FOREIGN KEY (userID) REFERENCES user_table(userId) ,
+FOREIGN KEY(groupID) REFERENCES group_table(groupId)
+);
+#member count 
+CREATE TABLE member_count( member_num  int(8) DEFAULT '0', 
+Id int(11) NOT NULL ,
+FOREIGN KEY(Id) REFERENCES group_table(groupId) );
+
+#counting number of members per a group
+# Trigger 
+DELIMITER $$
+CREATE TRIGGER member_add  
+AFTER INSERT   
+ON member_of FOR EACH ROW  
+BEGIN  
+UPDATE member_count
+SET member_num = (Select count(*) FROM member_of WHERE groupID=New.groupID)
+WHERE Id=New.groupID;
+END ;
+$$
+DELIMITER ;  
+#Tigger 
+DELIMITER $$
+CREATE TRIGGER admin_member
+AFTER INSERT
+ON group_table FOR EACH ROW
+BEGIN
+INSERT INTO member_of (userID,groupID)
+VALUES (New.group_admin,New.groupId);
+INSERT INTO member_count(Id)
+VALUES (New.groupId);
+END;
+ $$
+DELIMITER;
+#location
+
+CREATE TABLE location (
+g_id int(11) NOT NULL,
+location varchar(255) NOT NULL,
+FOREIGN KEY(g_id) REFERENCES group_table(groupId) ,
+CONSTRAINT location_pk Primary Key (g_id, location)
+);
+#scheduled meetings
+CREATE TABLE scheduled_meeting(
+groupid int(11) NOT NULL,
+scheduled_time time NOT NULL, 
+FOREIGN KEY(groupID) REFERENCES group_table(groupId),
+CONSTRAINT schedule_id PRIMARY KEY (groupID, scheduled_time)
+);
+
