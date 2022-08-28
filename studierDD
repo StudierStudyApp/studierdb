@@ -17,6 +17,7 @@ groupId int (255) AUTO_INCREMENT Primary Key,
 group_name varchar(250) NOT NULL,
 group_admin int(11)  NOT NULL, 
 state varchar(8) DEFAULT ‘inactive’, 
+type varchar(8) DEFAULT 'Online', 
 About varchar (355) NOT NULL,
 CONSTRAINT group_admin FOREIGN KEY (group_admin) REFERENCES user_table(userId)
 );
